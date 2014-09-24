@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>My AngularJS App</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
+        <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
+        <link rel="stylesheet" href="css/app.css"/>
+        <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
+    </head>
+    <body>
+
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+        <div ng-view>
+            <!-- Button trigger modal -->
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="#">NIIN Lookup</a>
+                    </div>
+
+
+                </div><!-- /.container-fluid -->
+            </nav>
+            <div ng-controller="MyCtrl1">
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" >
+                        <div class="modal-content">
+                            <div class="modal-header" id="openDialogHeader">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                            </div>
+                            <div class="modal-body" id="openDialogBody" style=" overflow: scroll">
+                                <table class="table table-striped">                    
+                                    <tr ng-repeat="n in nsnsInClass" >
+                                        <td style="text-wrap: none; white-space: nowrap">
+                                            <button ng-click="loadNsn(n.label)" value="{{n.label}}" data-dismiss="modal">{{n.label}}</button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="modal-footer" id="openDialogFooter">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            NIIN: <input class="form-control" ng-change="queryNsn(event)" ng-model="nsn" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        &nbsp;
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <span class="info" ng-if="nsnUri">
+                                &lt;{{nsnUri}}&gt;
+                                <span ng-if="nsnUri !== 'N/A'" ><a href="https://pinpoint.xsb.com/content/query/nsnexternal.do?nsn={{nsn}}"><span class="glyphicon glyphicon-link">&nbsp;</span></a></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        &nbsp;
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <span ng-repeat="p in nsnClasses" ng-if="$index < nsnClasses.length - 1">
+                                <a href="#"  data-toggle="modal" data-target="#myModal" ng-click="queryNsnsInClass(p.uri)"> {{p.label}} </a>
+                                <!--  <span class="glyphicon glyphicon-book" ng-if="p.description"></span>-->
+                                <!--<span class="glyphicon glyphicon-chevron-left" ng-if="$index < nsnClasses.length - 2"></span>-->
+                                <span class="large" ng-if="$index < nsnClasses.length - 2"><b>&SupersetEqual;</b></span>
+                            </span>
+                            <h1>{{nsnClasses[nsnClasses.length - 1].label}}</h1>
+                            <div class="col-md-8">{{ nsnClasses[nsnClasses.length - 1].description}}</div>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        &nbsp;
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5 col-md-offset-1">
+                            <div ng-if="nsnProperties === 'loading'">
+                                <span  class="glyphicon glyphicon-refresh">&nbsp;</span>
+                            </div>
+                            <div ng-if="nsnProperties !== 'loading' && nsnProperties.length > 0">
+                                <div><h4>Properties:</h4></div>
+                                <table border="1" class="table table-striped">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                    </tr>
+                                    <tr ng-repeat="p in nsnProperties">
+                                        <td>
+                                            <span ng-if="p.constraint" class="glyphicon glyphicon-compressed"></span>
+                                            <span ng-if="p.constraint === undefined" class="glyphicon glyphicon-check"></span>
+                                            {{p.name}}</td>
+                                        <td>{{p.value}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-5 col-md-offset-1">
+                            <div ng-if="nsnSuppliers === 'loading'">
+                                <span  class="glyphicon glyphicon-refresh">&nbsp;</span>
+                            </div>
+                            <div ng-if="nsnSuppliers !== 'loading' && nsnSuppliers.length > 0">
+                                <div><h4>Suppliers</h4></div>
+                                <table border="1" class="table table-striped">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>PN</th>
+                                    </tr>
+                                    <tr ng-repeat="p in nsnSuppliers" ng-click="$('#map').attr('src', p.mapurl)">
+                                        <td>{{p.name}} <span class="info small" ng-if="p.stdName"><br/>{{p.stdName}}</span></td>
+                                        <td>{{p.pn}} <span class="info small" ng-if="p.stdPn"><br/>{{p.stdPn}}</span></td>
+                                    </tr>
+                                    <!--                                    <tr>
+                                                                            <td colspan="2">
+                                                                                <iframe id="map" width="400" height="300" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/search?q=8400%20LAKEVIEW%20PKWY%20STE%20200%20PLEASANT%20PRAIRIE%20WI&key=AIzaSyCrShHOFj5dchG6L05NNxGSNDOw4qseFlw"></iframe>
+                                                                            </td>
+                                                                        </tr>-->
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        &nbsp;
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5 col-md-offset-1">
+                            <div ng-if="nsnConstraints === 'loading'">
+                                <span  class="glyphicon glyphicon-refresh">&nbsp;</span>
+                            </div>
+                            <div ng-if="nsnConstraints !== 'loading' && nsnConstraints.length > 0">
+                                <div><h4>Constraints:</h4></div>
+                                <table border="1" class="table table-striped">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                    </tr>
+                                    <tr ng-repeat="p in nsnConstraints">
+                                        <td>
+                                            <!--                                            <span ng-if="p.constraint" class="glyphicon glyphicon-compressed"></span>
+                                                                                        <span ng-if="p.constraint===undefined" class="glyphicon glyphicon-check"></span>-->
+                                            {{p.name}}</td>
+                                        <td>{{p.value}}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <textarea id="queryTextArea" type="text"
+                              ng-model="query" class="field span12" style="width:95%" 
+                              rows="6" cols="50"  placeholder="Queries will be logged here"
+                              ng-keypress="queryChange(event);"
+                              onkeypress="console.log('change');">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+        <!-- In production use:
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+        -->
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script src="bower_components/angular/angular.js"></script>
+        <script src="bower_components/angular-route/angular-route.js"></script>
+        <script src="bower_components/angular-resource/angular-resource.js"></script>
+        <script src="js/services.js"></script>
+        <script src="js/controllers.js"></script>
+        <script src="js/filters.js"></script>
+        <script src="js/directives.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/arbor/arbor.js"></script>
+
+        <script src="js/sparql/utils.js"></script>
+        <script src="js/sparql/sparql_parser.js"></script>
+        <script src="js/sparql/abstract_query_tree.js"></script>
+    </body>
+</html>
